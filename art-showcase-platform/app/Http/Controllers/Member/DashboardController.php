@@ -63,19 +63,19 @@ class DashboardController extends Controller
                 ->get();
                 
             // Collections
-            $collections = $user->collections()
-                ->withCount(['artworks' => function($query) {
-                    $query->where('status', 'published');
-                }])
-                ->with(['artworks' => function($query) {
-                    $query->where('status', 'published')
-                        ->select(['id', 'title', 'image_path'])
-                        ->latest()
-                        ->take(3);
-                }])
-                ->latest()
-                ->take(6)
-                ->get();
+            // $collections = $user->collections()
+            //     ->withCount(['artworks' => function($query) {
+            //         $query->where('status', 'published');
+            //     }])
+            //     ->with(['artworks' => function($query) {
+            //         $query->where('status', 'published')
+            //             ->select(['id', 'title', 'image_path'])
+            //             ->latest()
+            //             ->take(3);
+            //     }])
+            //     ->latest()
+            //     ->take(6)
+            //     ->get();
                 
             // Suggested artists
             $suggestedArtists = User::where('role', 'member')
@@ -129,7 +129,9 @@ class DashboardController extends Controller
                 'total_comments' => $user->artworks()->withCount('comments')->get()->sum('comments_count'),
                 'avg_views_per_artwork' => $artworksCount > 0 ? round($user->artworks()->avg('views_count'), 1) : 0,
             ];
-            
+                        
+            $collections = collect([]); 
+
             return compact(
                 'artworksCount',
                 'favoritesCount',
@@ -139,7 +141,7 @@ class DashboardController extends Controller
                 'publishedArtworksCount',
                 'recentArtworks',
                 'followingFeed',
-                'collections',
+                'collections', 
                 'suggestedArtists',
                 'activeChallenges',
                 'quickStats',
