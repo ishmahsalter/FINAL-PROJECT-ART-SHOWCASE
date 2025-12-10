@@ -625,7 +625,7 @@
                     <!-- Comment Form -->
                     @auth
                     <div class="p-6 border-b border-purple-500/30">
-                        <form id="comment-form" action="{{ route('artworks.comments.store', $artwork->id) }}" method="POST" class="space-y-4">
+                        <form id="comment-form" action="{{ route('artworks.comments.store', $artwork) }}" method="POST" class="space-y-4">
                             @csrf
                             <div class="flex gap-4">
                                 <!-- Avatar -->

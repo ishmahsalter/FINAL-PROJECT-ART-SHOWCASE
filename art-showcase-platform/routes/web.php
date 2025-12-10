@@ -13,6 +13,8 @@ use App\Http\Controllers\Auth\VerifyEmailController;
 use App\Http\Controllers\Auth\EmailVerificationNotificationController;
 use App\Http\Controllers\Auth\ConfirmablePasswordController;
 use App\Http\Controllers\Auth\PasswordController;
+use App\Http\Controllers\CommentController;
+
 
 // Member Controllers
 use App\Http\Controllers\Member\DashboardController as MemberDashboard;
@@ -138,6 +140,29 @@ Route::view('/privacy', 'static.privacy')->name('privacy');
 Route::view('/terms', 'static.terms')->name('terms');
 Route::view('/faq', 'static.faq')->name('faq');
 Route::view('/guidelines', 'static.guidelines')->name('guidelines');
+
+// Route untuk comments
+Route::middleware(['auth'])->group(function () {
+    // Store comment
+    Route::post('/artworks/{artwork}/comments', [CommentController::class, 'store'])
+        ->name('artworks.comments.store');
+    
+    // Update comment
+    Route::put('/comments/{comment}', [CommentController::class, 'update'])
+        ->name('comments.update');
+    
+    // Delete comment
+    Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])
+        ->name('comments.destroy');
+    
+    // Reply to comment
+    Route::post('/comments/{comment}/reply', [CommentController::class, 'reply'])
+        ->name('comments.reply');
+    
+    // Like comment
+    Route::post('/comments/{comment}/like', [CommentController::class, 'like'])
+        ->name('comments.like');
+});
 
 // =================== AUTH ROUTES ===================
 Route::get('/pending-approval', [PendingController::class, 'index'])
