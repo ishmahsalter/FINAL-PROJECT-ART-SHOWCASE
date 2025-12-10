@@ -13,7 +13,7 @@ class Comment extends Model
     protected $fillable = [
         'user_id',
         'artwork_id',
-        'comment',
+        'comment', // INI MASIH 'comment' - biarin sesuai database
     ];
 
     // Relationships
@@ -30,5 +30,11 @@ class Comment extends Model
     public function reports()
     {
         return $this->morphMany(Report::class, 'reportable');
+    }
+    
+    // Accessor untuk kompatibilitas dengan controller
+    public function getContentAttribute()
+    {
+        return $this->comment;
     }
 }

@@ -27,24 +27,48 @@ class RegisteredUserController extends Controller
      *
      * @throws \Illuminate\Validation\ValidationException
      */
-    public function store(Request $request): RedirectResponse
-    {
-        $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
-        ]);
+public function store(Request $request): RedirectResponse
+{
+    $request->validate([
+        'name' => ['required', 'string', 'max:255'],
+        'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
+        'password' => ['required', 'confirmed', Rules\Password::defaults()],
+        'role' => ['required', 'in:member,curator'],
+    ]);
 
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-        ]);
+    $status = ($request->role === 'curator') ? 'pending' : 'active';
 
-        event(new Registered($user));
+    $user = User::create([
+        'name' => $request->name,
+        'email' => $request->email,
+        'password' => Hash::make($request->password),
+        'role' => $request->role,
+        'status' => $status,
+        'display_name' => $request->name,
+    ]);
 
-        Auth::login($user);
+    event(new Registered($user));
 
-        return redirect(route('dashboard', absolute: false));
+    // Debug log
+    \Log::info('User registered:', [
+        'id' => $user->id,
+        'email' => $user->email,
+        'role' => $user->role,
+        'status' => $user->status,
+        'redirecting_to' => $request->role === 'curator' ? '/pending-approval' : '/home'
+    ]);
+
+    // PERHATIAN: Curator TIDAK auto-login!
+    if ($request->role === 'curator') {
+        // JANGAN login dulu, langsung redirect ke pending page
+        return redirect()->route('pending.approval')
+            ->with('info', 'Your curator account is pending admin approval. Please login to check your status.');
     }
+
+    // Hanya member yang auto-login
+    Auth::login($user);
+
+    return redirect()->route('home')
+        ->with('success', 'Registration successful! Welcome to ArtShowcase.');
+}
 }

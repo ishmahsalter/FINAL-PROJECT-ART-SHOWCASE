@@ -2,13 +2,12 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Report extends Model
 {
-    use HasFactory;
-
     protected $fillable = [
         'reporter_id',
         'reportable_type',
@@ -18,36 +17,60 @@ class Report extends Model
         'admin_note',
     ];
 
-    // Relationships
-    public function reporter()
+    protected $casts = [
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+    ];
+
+    /**
+     * Get the user who made the report.
+     */
+    public function reporter(): BelongsTo
     {
         return $this->belongsTo(User::class, 'reporter_id');
     }
 
-    public function reportable()
+    /**
+     * Get the reported content (polymorphic).
+     */
+    public function reportable(): MorphTo
     {
         return $this->morphTo();
     }
-
-    // Helper methods
-    public function isPending()
-    {
-        return $this->status === 'pending';
-    }
-
-    public function isDismissed()
-    {
-        return $this->status === 'dismissed';
-    }
-
-    public function isResolved()
-    {
-        return $this->status === 'resolved';
-    }
-
-    // Scopes
+    
+    /**
+     * Scope for pending reports.
+     */
     public function scopePending($query)
     {
         return $query->where('status', 'pending');
+    }
+    
+    /**
+     * Scope for resolved reports.
+     */
+    public function scopeResolved($query)
+    {
+        return $query->where('status', 'resolved');
+    }
+    
+    /**
+     * Scope for dismissed reports.
+     */
+    public function scopeDismissed($query)
+    {
+        return $query->where('status', 'dismissed');
+    }
+    
+    /**
+     * Get the display name for reportable type.
+     */
+    public function getReportableTypeNameAttribute(): string
+    {
+        return match($this->reportable_type) {
+            'App\Models\Artwork' => 'Artwork',
+            'App\Models\Comment' => 'Comment',
+            default => 'Unknown',
+        };
     }
 }

@@ -24,4 +24,6 @@ class Like extends Model
     {
         return $this->belongsTo(Artwork::class);
     }
+    
+    // HAPUS method up() dari sini - itu untuk migration!
 }

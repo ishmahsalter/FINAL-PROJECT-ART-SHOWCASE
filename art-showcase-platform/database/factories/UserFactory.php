@@ -6,39 +6,72 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
-/**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\User>
- */
 class UserFactory extends Factory
 {
-    /**
-     * The current password being used by the factory.
-     */
-    protected static ?string $password;
-
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
+        $username = $this->faker->unique()->userName;
+        
         return [
-            'name' => fake()->name(),
-            'email' => fake()->unique()->safeEmail(),
+            'name' => $this->faker->name(),
+            'username' => $username,
+            'email' => $this->faker->unique()->safeEmail(),
             'email_verified_at' => now(),
-            'password' => static::$password ??= Hash::make('password'),
+            'password' => Hash::make('password'),
+            'role' => 'member',
+            'status' => 'active',
+            'display_name' => $this->faker->userName(),
+            'bio' => $this->faker->paragraph(),
+            'avatar_url' => 'https://ui-avatars.com/api/?name=' . urlencode($this->faker->name()) . '&background=' . substr($this->faker->hexColor(), 1) . '&color=fff',
+            'cover_image_url' => $this->faker->imageUrl(1200, 400),
+            'website' => $this->faker->url(),
+            'social_links' => json_encode([
+                'instagram' => 'https://instagram.com/' . $username,
+                'twitter' => 'https://twitter.com/' . $username,
+            ]),
             'remember_token' => Str::random(10),
         ];
     }
 
-    /**
-     * Indicate that the model's email address should be unverified.
-     */
     public function unverified(): static
     {
         return $this->state(fn (array $attributes) => [
             'email_verified_at' => null,
+        ]);
+    }
+
+    public function admin(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => 'admin',
+        ]);
+    }
+
+    public function curator(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => 'curator',
+        ]);
+    }
+
+    public function pending(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'status' => 'pending',
+        ]);
+    }
+
+    public function suspended(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'status' => 'suspended',
+        ]);
+    }
+
+    public function banned(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'status' => 'banned',
         ]);
     }
 }

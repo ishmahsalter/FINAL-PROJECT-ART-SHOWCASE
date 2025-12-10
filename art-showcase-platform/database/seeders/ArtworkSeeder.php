@@ -1,52 +1,111 @@
 <?php
+// database/seeders/ArtworkSeeder.php
 
 namespace Database\Seeders;
 
 use App\Models\Artwork;
 use App\Models\User;
 use App\Models\Category;
+use App\Models\Challenge;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 
 class ArtworkSeeder extends Seeder
 {
     public function run(): void
     {
         $members = User::where('role', 'member')->get();
+        if ($members->isEmpty()) {
+            echo "❌ No member users found!\n";
+            return;
+        }
+        
         $categories = Category::all();
+        if ($categories->isEmpty()) {
+            echo "❌ No categories found!\n";
+            return;
+        }
+        
+        // Cek apakah ada challenges
+        $challenges = Challenge::all();
 
         $artworks = [
-            ['title' => 'Sunset Dreams', 'description' => 'A vibrant digital illustration of a dreamy sunset landscape', 'tags' => ['landscape', 'sunset', 'digital']],
-            ['title' => 'Cyber Warrior', 'description' => 'Futuristic character design with cyberpunk aesthetics', 'tags' => ['character', 'cyberpunk', 'scifi']],
-            ['title' => 'Mountain Peak', 'description' => 'Stunning photograph of mountain peaks at dawn', 'tags' => ['photography', 'nature', 'mountains']],
-            ['title' => 'Modern UI Kit', 'description' => 'Clean and minimal UI design system', 'tags' => ['ui', 'design', 'minimal']],
-            ['title' => 'Pixel Adventure', 'description' => 'Retro pixel art game scene', 'tags' => ['pixel', 'game', 'retro']],
-            ['title' => 'Abstract Geometry', 'description' => '3D geometric shapes with gradient colors', 'tags' => ['3d', 'abstract', 'geometry']],
-            ['title' => 'Brand Identity', 'description' => 'Complete brand identity design for a coffee shop', 'tags' => ['branding', 'logo', 'identity']],
-            ['title' => 'Character Concept', 'description' => 'Fantasy character design exploration', 'tags' => ['character', 'fantasy', 'concept']],
-            ['title' => 'City Lights', 'description' => 'Night photography of urban cityscape', 'tags' => ['photography', 'city', 'night']],
-            ['title' => 'Animated Logo', 'description' => 'Smooth logo animation for brand presentation', 'tags' => ['animation', 'logo', 'motion']],
-            ['title' => 'Isometric City', 'description' => 'Colorful isometric city illustration', 'tags' => ['isometric', 'city', 'illustration']],
-            ['title' => 'Portrait Study', 'description' => 'Digital portrait painting practice', 'tags' => ['portrait', 'painting', 'study']],
-            ['title' => 'Web Interface', 'description' => 'Modern web app interface design', 'tags' => ['web', 'interface', 'ui']],
-            ['title' => '3D Product', 'description' => 'Realistic product render for e-commerce', 'tags' => ['3d', 'product', 'render']],
-            ['title' => 'Space Explorer', 'description' => 'Sci-fi spaceship concept art', 'tags' => ['scifi', 'space', 'concept']],
-            ['title' => 'Vintage Poster', 'description' => 'Retro-style event poster design', 'tags' => ['poster', 'vintage', 'retro']],
-            ['title' => 'Nature Macro', 'description' => 'Close-up photography of nature details', 'tags' => ['photography', 'macro', 'nature']],
-            ['title' => 'Game Assets', 'description' => 'Complete 2D game asset pack', 'tags' => ['game', '2d', 'assets']],
-            ['title' => 'Typography Art', 'description' => 'Creative lettering and typography composition', 'tags' => ['typography', 'lettering', 'art']],
-            ['title' => 'Minimalist Scene', 'description' => 'Simple and clean 3D scene', 'tags' => ['3d', 'minimal', 'scene']],
+            [
+                'title' => 'Sunset Dreams', 
+                'description' => 'A vibrant digital illustration of a dreamy sunset landscape',
+                'media' => 'Digital Painting, Photoshop'
+            ],
+            [
+                'title' => 'Cyber Warrior', 
+                'description' => 'Futuristic character design with cyberpunk aesthetics',
+                'media' => '3D Modeling, Blender, Substance Painter'
+            ],
+            [
+                'title' => 'Mountain Peak', 
+                'description' => 'Stunning photograph of mountain peaks at dawn',
+                'media' => 'Photography, Lightroom'
+            ],
+            [
+                'title' => 'Modern UI Kit', 
+                'description' => 'Clean and minimal UI design system',
+                'media' => 'Figma, Illustrator'
+            ],
+            [
+                'title' => 'Pixel Adventure', 
+                'description' => 'Retro pixel art game scene',
+                'media' => 'Pixel Art, Aseprite'
+            ],
+            [
+                'title' => 'Abstract Geometry', 
+                'description' => '3D geometric shapes with gradient colors',
+                'media' => 'Cinema 4D, Octane Render'
+            ],
+            [
+                'title' => 'Brand Identity', 
+                'description' => 'Complete brand identity design for a coffee shop',
+                'media' => 'Illustrator, InDesign'
+            ],
+            [
+                'title' => 'Character Concept', 
+                'description' => 'Fantasy character design exploration',
+                'media' => 'Procreate, Photoshop'
+            ],
+            [
+                'title' => 'City Lights', 
+                'description' => 'Night photography of urban cityscape',
+                'media' => 'Photography, Long Exposure'
+            ],
+            [
+                'title' => 'Animated Logo', 
+                'description' => 'Smooth logo animation for brand presentation',
+                'media' => 'After Effects, Lottie'
+            ],
         ];
 
         foreach ($artworks as $index => $artwork) {
-            Artwork::create([
-                'user_id' => $members->random()->id,
-                'category_id' => $categories->random()->id,
-                'title' => $artwork['title'],
-                'description' => $artwork['description'],
-                'image_path' => 'artworks/sample-' . ($index + 1) . '.jpg', // Placeholder
-                'tags' => $artwork['tags'],
-                'view_count' => rand(10, 500),
-            ]);
+            try {
+                Artwork::create([
+                    'user_id' => $members->random()->id,
+                    'category_id' => $categories->random()->id,
+                    'challenge_id' => $challenges->isNotEmpty() ? $challenges->random()->id : null,
+                    'title' => $artwork['title'],
+                    'slug' => Str::slug($artwork['title']) . '-' . Str::random(6),
+                    'description' => $artwork['description'],
+                    'media_used' => $artwork['media'],
+                    'image_path' => 'artworks/sample-' . ($index + 1) . '.jpg',
+                    'views_count' => rand(10, 500),
+                    'likes_count' => rand(0, 100),
+                    'comments_count' => rand(0, 30),
+                    'favorites_count' => rand(0, 50),
+                    'created_at' => now()->subDays(rand(0, 30)),
+                ]);
+                
+                echo "✅ Created: {$artwork['title']}\n";
+            } catch (\Exception $e) {
+                echo "❌ Error creating {$artwork['title']}: " . $e->getMessage() . "\n";
+            }
         }
+        
+        echo "🎨 Artwork seeder completed! Total: " . Artwork::count() . " artworks\n";
     }
 }

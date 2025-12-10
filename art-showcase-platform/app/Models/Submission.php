@@ -10,21 +10,27 @@ class Submission extends Model
     use HasFactory;
 
     protected $fillable = [
+        'user_id',
         'challenge_id',
         'artwork_id',
-        'user_id',
+        'description',
+        'status',
+        'feedback',
+        'score',
         'winner_rank',
-        'submitted_at',
     ];
 
-    protected function casts(): array
-    {
-        return [
-            'submitted_at' => 'datetime',
-        ];
-    }
+    protected $casts = [
+        'score' => 'integer',
+        'winner_rank' => 'integer',
+    ];
 
     // Relationships
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
     public function challenge()
     {
         return $this->belongsTo(Challenge::class);
@@ -33,26 +39,5 @@ class Submission extends Model
     public function artwork()
     {
         return $this->belongsTo(Artwork::class);
-    }
-
-    public function user()
-    {
-        return $this->belongsTo(User::class);
-    }
-
-    // Helper methods
-    public function isWinner()
-    {
-        return !is_null($this->winner_rank);
-    }
-
-    public function getWinnerBadge()
-    {
-        return match($this->winner_rank) {
-            1 => '🥇 1st Place',
-            2 => '🥈 2nd Place',
-            3 => '🥉 3rd Place',
-            default => null,
-        };
     }
 }

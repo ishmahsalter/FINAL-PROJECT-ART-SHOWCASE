@@ -1,0 +1,51 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        // Cuma tambah kolom yang tidak ada
+        if (!Schema::hasColumn('artworks', 'image_url')) {
+            Schema::table('artworks', function (Blueprint $table) {
+                $table->string('image_url')->nullable();
+            });
+        }
+        
+        if (!Schema::hasColumn('artworks', 'thumbnail_url')) {
+            Schema::table('artworks', function (Blueprint $table) {
+                $table->string('thumbnail_url')->nullable();
+            });
+        }
+        
+        if (!Schema::hasColumn('artworks', 'tags')) {
+            Schema::table('artworks', function (Blueprint $table) {
+                $table->json('tags')->nullable();
+            });
+        }
+        
+        if (!Schema::hasColumn('artworks', 'visibility')) {
+            Schema::table('artworks', function (Blueprint $table) {
+                $table->string('visibility')->default('public');
+            });
+        }
+        
+        if (!Schema::hasColumn('artworks', 'report_count')) {
+            Schema::table('artworks', function (Blueprint $table) {
+                $table->integer('report_count')->default(0);
+            });
+        }
+    }
+
+    public function down(): void
+    {
+        // Drop jika perlu rollback
+        Schema::table('artworks', function (Blueprint $table) {
+            $columns = ['image_url', 'thumbnail_url', 'tags', 'visibility', 'report_count'];
+            $table->dropColumn($columns);
+        });
+    }
+};
